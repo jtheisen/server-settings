@@ -9,13 +9,27 @@ using System.Xml.Linq;
 
 namespace IronStone.ServerSettings
 {
+    /// <summary>
+    /// This class provides access to the server settings.
+    /// </summary>
     public static class Settings
     {
+        /// <summary>
+        /// Looks up a setting by name and provides the string value or the given default if no value was found.
+        /// </summary>
+        /// <param name="name">The setting's name.</param>
+        /// <param name="def">The default if no setting should be found.</param>
+        /// <returns>The found setting's value or the provided default.</returns>
         public static String GetString(String name, String def)
         {
             return SettingsConfiguration.RootSettingsSource.GetSetting(name) ?? def;
         }
 
+        /// <summary>
+        /// Looks up a setting by name and provides the string value or throws if no value was found.
+        /// </summary>
+        /// <param name="name">The setting's name.</param>
+        /// <returns>The found setting's value.</returns>
         public static String GetString(String name)
         {
             var result = GetString(name, null);
@@ -23,6 +37,13 @@ namespace IronStone.ServerSettings
             return result;
         }
 
+        /// <summary>
+        /// Looks up a setting by name and provides the integer value.
+        /// </summary>
+        /// <param name="name">The setting's name.</param>
+        /// <param name="def">The default.</param>
+        /// <returns>The found setting's value or the default if no setting was found.</returns>
+        /// <exception cref="System.Exception">When the value can't be parsed.</exception>
         public static Int32 GetInt32(String name, Int32? def = null)
         {
             var s = GetString(name, "");
@@ -31,6 +52,13 @@ namespace IronStone.ServerSettings
             return result;
         }
 
+        /// <summary>
+        /// Looks up a setting by name and provides the boolean value.
+        /// </summary>
+        /// <param name="name">The setting's name.</param>
+        /// <param name="def">The default.</param>
+        /// <returns>The found setting's value or the default if no setting was found.</returns>
+        /// <exception cref="System.Exception">When the value can't be parsed.</exception>
         public static Boolean GetBoolean(String name, Boolean? def = null)
         {
             var s = GetString(name, "");
@@ -41,7 +69,7 @@ namespace IronStone.ServerSettings
 
         static void Throw(String name, String value, String type)
         {
-            throw new Exception($"Setting '{name}' has value '{value}' which can't be parsed into an {type}.");
+            throw new Exception($"Setting '{name}' has value '{value}' which can't be parsed into a {type}.");
         }
     }
 
@@ -58,17 +86,31 @@ namespace IronStone.ServerSettings
 
     public abstract class SettingsSource
     {
+        /// <summary>
+        /// Provides the settings value of the setting with the given name or null if no such value is provided.
+        /// </summary>
+        /// <param name="name">The name of the setting.</param>
+        /// <returns>The provided value or null.</returns>
         public abstract String GetSetting(String name);
     }
 
     public class AppSettingsSettingsSource : SettingsSource
     {
+        /// <summary>
+        /// Provides the settings value of the setting with the given name or null if no such value is provided.
+        /// </summary>
+        /// <param name="name">The name of the setting.</param>
+        /// <returns>The provided value or null.</returns>
         public override string GetSetting(string name)
         {
             return ConfigurationManager.AppSettings.Get(name);
         }
     }
 
+    /// <summary>
+    /// This source provides settings from an xml file. The root element is settings, in which setting items
+    /// live, each having attributes name and value.
+    /// </summary>
     public abstract class FileSettingsSource : SettingsSource
     {
         static Logger log = LogManager.GetCurrentClassLogger();
@@ -107,8 +149,17 @@ namespace IronStone.ServerSettings
             }
         }
 
+        /// <summary>
+        /// An implementation provides the file name of the settings file.
+        /// </summary>
+        /// <returns></returns>
         protected abstract String GetFileName();
 
+        /// <summary>
+        /// Provides the settings value of the setting with the given name or null if no such value is provided.
+        /// </summary>
+        /// <param name="name">The name of the setting.</param>
+        /// <returns>The provided value or null.</returns>
         public override string GetSetting(string name)
         {
             if (settings == null)
@@ -131,6 +182,10 @@ namespace IronStone.ServerSettings
         XElement settings;
     }
 
+    /// <summary>
+    /// This source is a FileSettingsSource with the file expected to live at
+    /// (entry-assembly-location)/settings.xml.
+    /// </summary>
     public class LocalFileSettingsSource : FileSettingsSource
     {
         protected override string GetFileName()
@@ -141,6 +196,10 @@ namespace IronStone.ServerSettings
         }
     }
 
+    /// <summary>
+    /// This source is a FileSettingsSource with the file expected to live at
+    /// (user-home-directory)\settings\(entry-assembly-name).xml.
+    /// </summary>
     public class HomeFileSettingsSource: FileSettingsSource
     {
         protected override string GetFileName()
@@ -154,6 +213,11 @@ namespace IronStone.ServerSettings
         Assembly EntryAssembly => EntryAssemblyAttribute.GetEntryAssembly();
     }
 
+    /// <summary>
+    /// This source combines multiple nested sources. The sources are looked up in order
+    /// until a source provides a value for the given name, which is the value returned
+    /// by the combined settings source.
+    /// </summary>
     public class CombinedSettingsSource : SettingsSource
     {
         public CombinedSettingsSource(IEnumerable<SettingsSource> sources)
