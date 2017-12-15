@@ -64,10 +64,18 @@ namespace IronStone
                 }
             }
 
-            // Note that we use LINQ Single to ensure we found one and only one assembly with the 
-            // EntryAssemblyAttribute.  The EntryAssemblyAttribute should only be put on one assembly 
-            // per application.
-            return entryAssemblies.Single();
+            if (entryAssemblies.Count > 1)
+            {
+                throw new Exception("The EntryAssemblyAttribute should only be put on one assembly per application.");
+            }
+            else if (entryAssemblies.Count == 0)
+            {
+                throw new Exception("Please mark your entry assembly with the EntryAssemblyAttribute.");
+            }
+            else
+            {
+                return entryAssemblies.Single();
+            }
         }
     }
 }
