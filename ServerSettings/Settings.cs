@@ -7,7 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Xml.Linq;
 
-namespace MonkeyBusters.ServerSettings
+namespace IronStone.ServerSettings
 {
     public static class Settings
     {
