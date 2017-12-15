@@ -41,7 +41,7 @@ namespace IronStone.ServerSettings
 
         static void Throw(String name, String value, String type)
         {
-            throw new Exception("Setting '{name}' has value '{value}' which can't be parsed into an {type}.");
+            throw new Exception($"Setting '{name}' has value '{value}' which can't be parsed into an {type}.");
         }
     }
 
@@ -75,11 +75,12 @@ namespace IronStone.ServerSettings
 
         void AttemptLoading()
         {
+            var filepath = GetFileName();
+
             try
             {
                 loadingAttempted = true;
 
-                var filepath = GetFileName();
                 if (File.Exists(filepath))
                 {
                     var text = File.ReadAllText(filepath);
@@ -102,7 +103,7 @@ namespace IronStone.ServerSettings
             }
             catch (Exception ex)
             {
-                log.Error(ex, "Failed to load file settings.");
+                log.Error(ex, "Failed to load file settings at {0}.", filepath);
             }
         }
 
