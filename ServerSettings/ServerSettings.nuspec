@@ -1,0 +1,17 @@
+﻿<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>IronStone.ServerSettings</id>
+    <version>0.1.0</version>
+    <title>ServerSettings</title>
+    <authors>Jens Theisen</authors>
+    <owners>Jens Theisen</owners>
+    <projectUrl>https://github.com/jtheisen/server-settings</projectUrl>
+    <!--<iconUrl>http://ICON_URL_HERE_OR_DELETE_THIS_LINE</iconUrl>-->
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <summary>An app settings alternative.</summary>
+    <description>App settings that can read from a user-specific config during development.</description>
+    <copyright>Copyright 2016</copyright>
+    <tags>ironstone server-settings serversettings</tags>
+  </metadata>
+</package>
