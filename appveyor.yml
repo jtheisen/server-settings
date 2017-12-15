@@ -16,6 +16,8 @@ assembly_info:
 
 configuration: Debug
 
+image: Visual Studio 2017
+
 nuget:
   account_feed: true
   project_feed: true
@@ -28,7 +30,7 @@ build:
   verbosity: minimal
 
 after_build:
-- ps: nuget pack BasicBundles\BasicBundles.csproj -version "$env:nugetVersion"
+- ps: nuget pack ServerSettings\ServerSettings.csproj -version "$env:nugetVersion"
 
 artifacts:
 - path: '*.nupkg'
