@@ -56,8 +56,7 @@ namespace IronStone
                 // Note the usage of LINQ SingleOrDefault.  The EntryAssemblyAttribute's AttributeUsage 
                 // only allows it to occur once per assembly; declaring it more than once results in 
                 // a compiler error.
-                var attribute =
-                    assembly.GetCustomAttributes().OfType<EntryAssemblyAttribute>().SingleOrDefault();
+                var attribute = assembly.GetCustomAttributes<EntryAssemblyAttribute>();
                 if (attribute != null)
                 {
                     entryAssemblies.Add(assembly);
