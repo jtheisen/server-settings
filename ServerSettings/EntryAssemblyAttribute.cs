@@ -57,7 +57,7 @@ namespace IronStone
                 // only allows it to occur once per assembly; declaring it more than once results in 
                 // a compiler error.
                 var attribute = assembly.GetCustomAttributes<EntryAssemblyAttribute>();
-                if (attribute != null)
+                if (attribute != null && attribute.Count() > 0)
                 {
                     entryAssemblies.Add(assembly);
                 }

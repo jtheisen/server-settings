@@ -159,7 +159,7 @@ namespace IronStone.ServerSettings
             }
             catch (Exception ex)
             {
-                log.Warn(ex, "No file settings due to unknown entry assembly or other error conditions.");
+                log.Warn(ex, "No file settings because: " + ex.Message);
 
                 return null;
             }
