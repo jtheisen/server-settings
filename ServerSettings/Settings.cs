@@ -117,7 +117,9 @@ namespace IronStone.ServerSettings
 
         void AttemptLoading()
         {
-            var filepath = GetFileName();
+            var filepath = GetFileNameSafely();
+
+            if (filepath == null) return;
 
             try
             {
@@ -146,6 +148,20 @@ namespace IronStone.ServerSettings
             catch (Exception ex)
             {
                 log.Error(ex, "Failed to load file settings at {0}.", filepath);
+            }
+        }
+
+        String GetFileNameSafely()
+        {
+            try
+            {
+                return GetFileName();
+            }
+            catch (Exception ex)
+            {
+                log.Warn(ex, "No file settings due to unknown entry assembly or other error conditions.");
+
+                return null;
             }
         }
 
