@@ -10,7 +10,7 @@
     <!--<iconUrl>http://ICON_URL_HERE_OR_DELETE_THIS_LINE</iconUrl>-->
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <summary>An app settings alternative.</summary>
-    <description>App settings that can read from a user-specific config during development.</description>
+    <description>App settings that can be read from a user-specific config during development.</description>
     <copyright>Copyright 2016</copyright>
     <tags>ironstone server-settings serversettings</tags>
   </metadata>

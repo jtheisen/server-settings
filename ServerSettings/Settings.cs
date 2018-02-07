@@ -81,6 +81,7 @@ namespace IronStone.ServerSettings
                 new HomeFileSettingsSource(),
                 new LocalFileSettingsSource(),
                 new AppSettingsSettingsSource(),
+                new EnvironmentSettingsSource()
             });
     }
 
@@ -216,7 +217,7 @@ namespace IronStone.ServerSettings
     /// This source is a FileSettingsSource with the file expected to live at
     /// (user-home-directory)\settings\(entry-assembly-name).xml.
     /// </summary>
-    public class HomeFileSettingsSource: FileSettingsSource
+    public class HomeFileSettingsSource : FileSettingsSource
     {
         protected override string GetFileName()
         {
@@ -227,6 +228,20 @@ namespace IronStone.ServerSettings
         }
 
         Assembly EntryAssembly => EntryAssemblyAttribute.GetEntryAssembly();
+    }
+
+    /// <summary>
+    /// This source provides settings from the environment as per the Azure App Services
+    /// naming convention as APPSETTING_{name}.
+    /// </summary>
+    public class EnvironmentSettingsSource : SettingsSource
+    {
+        public override string GetSetting(string name)
+        {
+            var result = Environment.ExpandEnvironmentVariables($"%APPSETTING_{name}%");
+            if (result.StartsWith("%")) return null;
+            return result;
+        }
     }
 
     /// <summary>
