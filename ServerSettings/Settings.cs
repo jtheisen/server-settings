@@ -270,7 +270,7 @@ namespace IronStone.ServerSettings
         public override string GetSetting(string name)
         {
             var filename = GetFileNameSafely();
-            if (string.IsNullOrWhiteSpace(filename))
+            if (string.IsNullOrWhiteSpace(filename) || !File.Exists(filename))
             {
                 return null;
             }
