@@ -1,4 +1,5 @@
-﻿using NLog;
+﻿using Newtonsoft.Json.Linq;
+using NLog;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -67,7 +68,7 @@ namespace IronStone.ServerSettings
             return result;
         }
 
-        static void Throw(String name, String value, String type)
+        private static void Throw(String name, String value, String type)
         {
             throw new Exception($"Setting '{name}' has value '{value}' which can't be parsed into a {type}.");
         }
@@ -80,6 +81,8 @@ namespace IronStone.ServerSettings
             {
                 new HomeFileSettingsSource(),
                 new LocalFileSettingsSource(),
+                new HomeJsonSettingsSource(),
+                new GlobalJsonSettingsSource(),
                 new AppSettingsSettingsSource(),
                 new EnvironmentSettingsSource()
             });
@@ -114,9 +117,9 @@ namespace IronStone.ServerSettings
     /// </summary>
     public abstract class FileSettingsSource : SettingsSource
     {
-        static Logger log = LogManager.GetCurrentClassLogger();
+        private static readonly Logger log = LogManager.GetCurrentClassLogger();
 
-        void AttemptLoading()
+        private void AttemptLoading()
         {
             var filepath = GetFileNameSafely();
 
@@ -152,7 +155,7 @@ namespace IronStone.ServerSettings
             }
         }
 
-        String GetFileNameSafely()
+        private String GetFileNameSafely()
         {
             try
             {
@@ -195,8 +198,8 @@ namespace IronStone.ServerSettings
             return null;
         }
 
-        Boolean loadingAttempted;
-        XElement settings;
+        private Boolean loadingAttempted;
+        private XElement settings;
     }
 
     /// <summary>
@@ -207,7 +210,7 @@ namespace IronStone.ServerSettings
     {
         protected override string GetFileName()
         {
-            var basepath = System.Reflection.Assembly.GetExecutingAssembly().CodeBase;
+            var basepath = Assembly.GetExecutingAssembly().CodeBase;
             var filepath = Path.Combine(basepath, "settings.xml");
             return filepath;
         }
@@ -227,7 +230,7 @@ namespace IronStone.ServerSettings
             return filepath;
         }
 
-        Assembly EntryAssembly => EntryAssemblyAttribute.GetEntryAssembly();
+        private Assembly EntryAssembly => EntryAssemblyAttribute.GetEntryAssembly();
     }
 
     /// <summary>
@@ -241,6 +244,76 @@ namespace IronStone.ServerSettings
             var result = Environment.ExpandEnvironmentVariables($"%APPSETTING_{name}%");
             if (result.StartsWith("%")) return null;
             return result;
+        }
+    }
+
+    public abstract class JsonFileSettingsSource : SettingsSource
+    {
+        private static readonly Logger log = LogManager.GetCurrentClassLogger();
+
+        protected abstract String GetFileName();
+
+        private String GetFileNameSafely()
+        {
+            try
+            {
+                return GetFileName();
+            }
+            catch (Exception ex)
+            {
+                log.Warn(ex, "No file settings because: " + ex.Message);
+
+                return null;
+            }
+        }
+
+        public override string GetSetting(string name)
+        {
+            var filename = GetFileNameSafely();
+            if (string.IsNullOrWhiteSpace(filename))
+            {
+                return null;
+            }
+            var text = File.ReadAllText(filename);
+            var jObject = JObject.Parse(text);
+            var paths = name.Split(':');
+            JToken tmp = jObject[paths.First()];
+            foreach (var path in paths.Skip(1))
+            {
+                if (tmp == null)
+                {
+                    return null;
+                }
+                tmp = tmp[path];
+            }
+            if (tmp == null)
+            {
+                return null;
+            }
+            return tmp.Value<string>();
+        }
+    }
+
+    public class HomeJsonSettingsSource : JsonFileSettingsSource
+    {
+        protected override string GetFileName()
+        {
+            var basepath = Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%");
+            var assemblyName = EntryAssembly.GetName().Name;
+            var filepath = Path.Combine(basepath, "settings", $"{assemblyName}.json");
+            return filepath;
+        }
+
+        private Assembly EntryAssembly => EntryAssemblyAttribute.GetEntryAssembly();
+    }
+
+    public class GlobalJsonSettingsSource : JsonFileSettingsSource
+    {
+        protected override string GetFileName()
+        {
+            var basepath = Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%");
+            var filepath = Path.Combine(basepath, "settings", "global.settings.json");
+            return filepath;
         }
     }
 
@@ -261,6 +334,6 @@ namespace IronStone.ServerSettings
             return sources.Select(s => s.GetSetting(name)).FirstOrDefault(s => s != null);
         }
 
-        SettingsSource[] sources;
+        private readonly SettingsSource[] sources;
     }
 }
