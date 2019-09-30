@@ -1,5 +1,5 @@
 environment:
-  version: 0.2.3
+  version: 0.3.0
   versionSuffix:
 
 init:
@@ -16,7 +16,7 @@ assembly_info:
 
 configuration: Debug
 
-image: Visual Studio 2017
+image: Visual Studio 2019
 
 nuget:
   account_feed: true
